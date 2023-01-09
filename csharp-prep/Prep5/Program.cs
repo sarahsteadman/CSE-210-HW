@@ -24,7 +24,8 @@ class Program
     static float PromptUserNumber()
         {
             Console.WriteLine("Please enter your favorite number: ");
-            float number = Console.Read();
+            string stringsAreStupid = Console.ReadLine();
+            float number = float.Parse(stringsAreStupid);
             return number;
         }
     static float SquareNumber(float number)
