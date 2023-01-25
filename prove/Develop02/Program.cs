@@ -5,7 +5,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        journal currentJournal = new journal();
+        Journal currentJournal = new Journal();
         string choice = "What is the point of a Do loop if I can't define a variable inside of it? It's a glorified while loop!";
         Console.WriteLine("Welcome to the Journal Program!");
         Console.WriteLine("");
@@ -17,23 +17,23 @@ class Program
 
             if (choice == "1")
             {
-                entry currentEntry = NewEntry();
+                Entry currentEntry = NewEntry();
                 currentJournal._entries.Add(currentEntry);
             }
             else if (choice == "2")
             {
-                currentJournal.display();
+                currentJournal.Display();
             }
             else if (choice == "3")
             {
-                currentJournal = new journal();
-                Console.WriteLine("What is the name of the file you would like to load?");
+                currentJournal = new Journal();
+                Console.WriteLine("What is the name of the file you would like to Load?");
                 currentJournal._name = Console.ReadLine();
-                currentJournal.load();
+                currentJournal.Load();
             }
             else if (choice == "4")
             {
-                currentJournal.save();
+                currentJournal.Save();
             }
             else if (choice != "5")
             {
@@ -52,9 +52,9 @@ class Program
         Console.WriteLine("5. Quit");
         Console.WriteLine("");
     }
-    static entry NewEntry()
+    static Entry NewEntry()
     {
-        entry currentEntry = new entry();
+        Entry currentEntry = new Entry();
         DateTime date = DateTime.Today;
         currentEntry._date = date.ToShortDateString();
 
@@ -97,42 +97,42 @@ class Program
         var random = new Random();
         return prompts[random.Next(prompts.Count)];
     }
-    public class journal
+    public class Journal
     {
         public string _name;
-        public List<entry> _entries = new List<entry>();
+        public List<Entry> _entries = new List<Entry>();
 
-        public void display()
+        public void Display()
         {
             Console.WriteLine("");
             Console.WriteLine($"{_name}");
-            foreach (entry i in _entries)
+            foreach (Entry i in _entries)
             {
                 Console.WriteLine($"{i._date} {i._entryPrompt} {i._response}");
             }
         }
 
-        public void save()
+        public void Save()
         {
-            Console.WriteLine("What would you like to name this journal?");
+            Console.WriteLine("What would you like to name this Journal?");
             _name = Console.ReadLine();
 
             using (StreamWriter outputFile = new StreamWriter(_name))
             {
-                foreach (entry i in _entries)
+                foreach (Entry i in _entries)
                 {
                     outputFile.WriteLine($"{i._date}~{i._entryPrompt}~{i._response}");
                 }
 
             }
         }
-        public void load()
+        public void Load()
         {
             string[] lines = System.IO.File.ReadAllLines(_name);
 
             foreach (string line in lines)
             {
-                entry currentEntry = new entry();
+                Entry currentEntry = new Entry();
                 string[] parts = line.Split("~");
 
                 currentEntry._date = parts[0];
@@ -141,12 +141,12 @@ class Program
 
                 _entries.Add(currentEntry);
             }
-            display();
+            Display();
 
         }
 
     }
-    public class entry
+    public class Entry
     {
         public string _response;
         public string _entryPrompt;
