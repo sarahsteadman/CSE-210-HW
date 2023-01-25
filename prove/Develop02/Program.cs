@@ -4,7 +4,7 @@ using System.IO;
 class Program
 {
     static void Main(string[] args)
-    {   
+    {
         journal currentJournal = new journal();
         string choice = "What is the point of a Do loop if I can't define a variable inside of it? It's a glorified while loop!";
         Console.WriteLine("Welcome to the Journal Program!");
@@ -53,34 +53,34 @@ class Program
         Console.WriteLine("");
     }
     static entry NewEntry()
+    {
+        entry currentEntry = new entry();
+        DateTime date = DateTime.Today;
+        currentEntry._date = date.ToShortDateString();
+
+        Console.WriteLine("Would you like a prompt?(Y/N)");
+        string promptQuestion = Console.ReadLine();
+
+        if (promptQuestion.ToLower() == "y")
         {
-            entry currentEntry = new entry();
-            DateTime date = DateTime.Today;
-            currentEntry._date = date.ToShortDateString();
-
-            Console.WriteLine("Would you like a prompt?(Y/N)");
-            string promptQuestion = Console.ReadLine();
-
-            if (promptQuestion.ToLower() == "y") 
-            {
-                currentEntry._entryPrompt = GenoratePrompt();
-                Console.WriteLine($"{currentEntry._entryPrompt}");
-                Console.WriteLine("");                
-            }
-            else if (promptQuestion.ToLower() == "n")
-            {
-                currentEntry._entryPrompt = "Free Response";
-                Console.WriteLine($"Write below!");
-                Console.WriteLine("");
-            }
-
-            currentEntry._response = Console.ReadLine();
-
-            return currentEntry;
+            currentEntry._entryPrompt = GenoratePrompt();
+            Console.WriteLine($"{currentEntry._entryPrompt}");
+            Console.WriteLine("");
         }
-    static string GenoratePrompt()
+        else if (promptQuestion.ToLower() == "n")
         {
-            List<string> prompts = new List<string>()
+            currentEntry._entryPrompt = "Free Response";
+            Console.WriteLine($"Write below!");
+            Console.WriteLine("");
+        }
+
+        currentEntry._response = Console.ReadLine();
+
+        return currentEntry;
+    }
+    static string GenoratePrompt()
+    {
+        List<string> prompts = new List<string>()
                 {
                     "Who was the most interesting person I interacted with today?",
                     "What was the best part of my day?",
@@ -94,63 +94,63 @@ class Program
                     "Who or what impacted me the most today?"
                 };
 
-            var random = new Random();
-            return prompts[random.Next(prompts.Count)];
-        }
+        var random = new Random();
+        return prompts[random.Next(prompts.Count)];
+    }
     public class journal
-        {
-            public string _name;
-            public List<entry> _entries = new List<entry>();
+    {
+        public string _name;
+        public List<entry> _entries = new List<entry>();
 
-            public void display()
+        public void display()
+        {
+            Console.WriteLine("");
+            Console.WriteLine($"{_name}");
+            foreach (entry i in _entries)
             {
-                Console.WriteLine("");                
-                Console.WriteLine($"{_name}");
+                Console.WriteLine($"{i._date} {i._entryPrompt} {i._response}");
+            }
+        }
+
+        public void save()
+        {
+            Console.WriteLine("What would you like to name this journal?");
+            _name = Console.ReadLine();
+
+            using (StreamWriter outputFile = new StreamWriter(_name))
+            {
                 foreach (entry i in _entries)
                 {
-                Console.WriteLine($"{i._date} {i._entryPrompt} {i._response}");
+                    outputFile.WriteLine($"{i._date}~{i._entryPrompt}~{i._response}");
                 }
+
             }
-
-            public void save()
-            {
-                Console.WriteLine("What would you like to name this journal?");
-                _name = Console.ReadLine();
-
-                using (StreamWriter outputFile = new StreamWriter(_name))
-                    {
-                    foreach (entry i in _entries)
-                        {
-                            outputFile.WriteLine($"{i._date}~{i._entryPrompt}~{i._response}");
-                        }
-
-                    }
-            }
-            public void load()
-            {
-                string[] lines = System.IO.File.ReadAllLines(_name);
-
-                foreach (string line in lines)
-                    {
-                        entry currentEntry = new entry();
-                        string[] parts = line.Split("~");
-
-                         currentEntry._date = parts[0];
-                         currentEntry._entryPrompt = parts[1];
-                         currentEntry._response = parts[2]; 
-
-                        _entries.Add(currentEntry);
-                        }
-                display();    
-                           
-            }
-
         }
-    public class entry
+        public void load()
         {
-            public string _response;
-            public string _entryPrompt;
-            public string _date;
+            string[] lines = System.IO.File.ReadAllLines(_name);
+
+            foreach (string line in lines)
+            {
+                entry currentEntry = new entry();
+                string[] parts = line.Split("~");
+
+                currentEntry._date = parts[0];
+                currentEntry._entryPrompt = parts[1];
+                currentEntry._response = parts[2];
+
+                _entries.Add(currentEntry);
+            }
+            display();
+
         }
-    
+
+    }
+    public class entry
+    {
+        public string _response;
+        public string _entryPrompt;
+        public string _date;
+    }
+
 }
