@@ -34,6 +34,7 @@ class Program
                     break;
             }
         }
+        Console.Clear();
     }
 
     static int Menu()
