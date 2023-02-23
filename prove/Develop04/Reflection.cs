@@ -19,9 +19,17 @@
             DateTime futureTime = startTime.AddSeconds(_durationDesired);
 
             {
-                Console.WriteLine(prompt);
-                PauseAnimation(5);
+                Console.WriteLine("Consider the followint prompt:");
                 Console.WriteLine("");
+                Console.WriteLine($"---{prompt}---");
+                Console.WriteLine("");
+                Console.WriteLine("Press enter when you have something in mind.");
+                Console.ReadLine();
+                Console.WriteLine();
+                Console.WriteLine("Now think about the the following questions that relate to this experience:");
+                GetReady();
+
+
                 foreach (string question in _questions)
                 {
                     Console.WriteLine(question);
