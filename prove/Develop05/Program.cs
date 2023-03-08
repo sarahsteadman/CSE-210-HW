@@ -111,7 +111,7 @@ class Program
                     while (fish == "fry")
                     {
                         int selection = 0;
-                        string answer = reccomendedGoals();
+                        string answer = recommendedGoals();
                         bool isNumber = int.TryParse(answer, out selection);
                         selection -= 1;
                         
@@ -146,7 +146,7 @@ class Program
         Console.WriteLine(" 3. Save Goals");
         Console.WriteLine(" 4. Load Goals");
         Console.WriteLine(" 5. Record Event");
-        Console.WriteLine(" 6. View Reccomended Goals");
+        Console.WriteLine(" 6. View recommended Goals");
         Console.WriteLine(" 7. Quit");
         Console.WriteLine("Select a choice from the menu:");
 
@@ -233,7 +233,7 @@ class Program
         return currentEntry;
     }
 
-    static string reccomendedGoals()
+    static string recommendedGoals()
     {
 
         Console.WriteLine("Spiritual Goals:");
