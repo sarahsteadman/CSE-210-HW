@@ -2,6 +2,7 @@ public class Simple : Goal
 {
     public Simple()
     {
-        _type = "Simple";
+        _type = 2;
+
     }
 }
