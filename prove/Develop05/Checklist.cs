@@ -26,7 +26,16 @@ public class Checklist : Goal
     }
     public override void Display(int count)
     {
-        Console.WriteLine($"{count}. [{_timesCompleted}/{_toComplete}] {_name} ({_description})");
+        if (_completed == " ")
+        {
+            Console.WriteLine($"{count}. [{_timesCompleted}/{_toComplete}] {_name} ({_description})");
+        }
+        else
+        {
+            Console.WriteLine($"{count}. [{_completed}] {_name} ({_description})");
+        }
+
+
     }
     public override string SaveFormat()
     {
