@@ -5,6 +5,7 @@ public class Square
     private int _y;
     private bool _isOccupied;
     private Piece _occupyingPiece;
+    private Square _enPassant = null;
 
     public Square(int x, int y)
     {
@@ -33,6 +34,14 @@ public class Square
         _isOccupied = true;
         _occupyingPiece = p;
         p.SetPlace(s);
+
+        if (_enPassant != null)
+        {
+            if( p.GetSymbol() == "p" || p.GetSymbol() ==  "P");
+            {
+                EnPassant();
+            }
+        }
     }
     public void Leave()
     {
@@ -70,5 +79,25 @@ public class Square
     public Piece OccupyingPiece()
     {
         return _occupyingPiece;
+    }
+    public void SetEnPassant(Square PawnsSquare)
+    {
+        PawnsSquare = _enPassant;
+    }
+    public bool ActiveEnPassant()
+    {
+        if(_enPassant != null)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    public void EnPassant()
+    {
+            _enPassant.Leave();
+            _enPassant = null;
     }
 }

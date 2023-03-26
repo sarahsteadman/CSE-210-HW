@@ -1,7 +1,7 @@
 using System;
 
 //  Castling, En Passant
-//
+//  Don't let pieces make moves that could put the king in check. 
 //Hypothetically Checks and game ending has been programmed. Requires testing.
 //
 
@@ -12,45 +12,59 @@ class Program
     {
         List<Square> squares = MakeChessBoard();
 
-        Queen q = new Queen(false);
-        Square s = squares.Find(s => s.GetName() == "E7");
-
-        s.Occupy(q, s);
         bool over = false;
         bool whiteTurn = true;
+        string symbol = "";
 
 
         while (!over)
         {
+
+                        // ****************************Round Set Up******************************** //
+
+            bool inCheck = false;
+
+            EndEnPassant(whiteTurn, squares);
+
             DisplayChessBoard(whiteTurn, squares);
-            string symbol = "";
+
             if (whiteTurn)
             {
                 Console.WriteLine("White choose a piece to move");
-
                 symbol = "K";
             }
             else
             {
-                symbol = "k";
                 Console.WriteLine("Black choose a piece to move");
+                symbol = "k";
             }
 
-            bool incheck = checkCheck(symbol, squares);
-            if (incheck)
+            inCheck = checkCheck(symbol, squares);
+
+            if (inCheck)
             {
                 over = checkCheckmate(symbol, squares);
 
                 if (over)
                 {
                     Console.WriteLine("CHECKMATE!!!");
-                    break;
+                    over = true;
                 }
                 else
                 {
                     Console.WriteLine("Your king is in check. He must be out of check by the end of your turn.");
                 }
             }
+
+            if (over)
+            {
+                break;
+            }
+
+
+                        // ***********************Selecting a move*************************** //
+
+
 
             string selectedSquare = Console.ReadLine().ToUpper();
             Square selected = squares.Find(s => s.GetName() == selectedSquare);
@@ -111,11 +125,11 @@ class Program
                     selected.Leave();
                     moves[index].Occupy(piece, moves[index]);
 
-                    if (incheck)
+                    if (inCheck)
                     {
-                        incheck = checkCheck(symbol, squares);
+                        inCheck = checkCheck(symbol, squares);
 
-                        if (incheck)
+                        if (inCheck)
                         {
                             moves[index].Leave();
                             selected.Occupy(piece, selected);
@@ -145,19 +159,19 @@ class Program
                 continue;
             }
 
+                          // **********************Switching Players************************ //
+
+
             if (whiteTurn)
             {
                 whiteTurn = false;
+
             }
             else
             {
                 whiteTurn = true;
             }
-
-
         }
-
-
     }
 
     static List<Square> MakeChessBoard()
@@ -199,12 +213,6 @@ class Program
     }
     static void DisplayChessBoard(bool white, List<Square> squares)
     {
-        Console.WriteLine(white);
-        foreach (Square square in squares)
-        {
-            Console.WriteLine(square.GetName());
-        }
-
         List<Square> fakeSquares = squares;
         string letters = "   A   B   C   D   E   F   G   H";
         int grid = 1;
@@ -338,6 +346,7 @@ class Program
         return pieces;
     }
 
+
     static bool checkCheck(string symbol, List<Square> squares)
     {
         Square kingsSquare = squares.Find(s => FindBySymbol(s, symbol));
@@ -368,7 +377,6 @@ class Program
         Square kingsSquare = fakeSquares.Find(s => FindBySymbol(s, symbol));
         Piece king = kingsSquare.OccupyingPiece();
         List<Square> moves = new List<Square>();
-        List<Square> kingMoves = new List<Square>();
 
         foreach (Square square in fakeSquares)
         {
@@ -377,60 +385,33 @@ class Program
                 Piece piece = square.OccupyingPiece();
                 if (piece.IsWhite() == king.IsWhite())
                 {
-                    // if (piece.GetSymbol() == "K" || piece.GetSymbol() == "k")
-                    // {
-                    //     kingMoves = kingMoves.Concat(piece.ForbidonSquares(kingsSquare.GetName(), squares)).ToList();
-                    //     continue;
-                    // }
-                    moves = moves.Concat(piece.GetMoves(fakeSquares)).ToList();
+                    moves = piece.GetMoves(fakeSquares);
+
+                    if (piece.GetSymbol() == "p" && piece.GetSymbol() == "P")
+                    { piece = new Queen(king.IsWhite()); }
+                    foreach (Square move in moves)
+                    {
+                        square.Leave();
+                        move.Occupy(piece, move);
+                        if (!checkCheck(symbol, fakeSquares))
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            move.Leave();
+                            square.Occupy(piece, move);
+                        }
+
+                    }
 
                 }
             }
         }
-
-        foreach (Square move in kingMoves)
-        {
-            kingsSquare.Leave();
-            move.Occupy(king, move);
-
-            if (move.IsOccupied())
-            {
-                continue;
-            }
-
-
-            if (!checkCheck(symbol, fakeSquares))
-            {
-                move.Leave();
-                kingsSquare.Occupy(king, kingsSquare);
-
-                DisplayChessBoard(true, squares);
-                Console.WriteLine("1");
-                Console.ReadLine();
-                return false;
-            }
-
-            move.Leave();
-            kingsSquare.Occupy(king, kingsSquare);
-        }
-
-        foreach (Square move in moves)
-        {
-            Pawn pretend = new Pawn(king.IsWhite());
-            move.Occupy(pretend, move);
-
-            if (!checkCheck(symbol, fakeSquares))
-            {
-                move.Leave();
-                return false;
-            }
-
-            move.Leave();
-        }
-
         return true;
-
     }
+
+
     static bool FindBySymbol(Square square, string symbol)
     {
         if (square.IsOccupied())
@@ -449,4 +430,21 @@ class Program
             return false;
         }
     }
+    static void EndEnPassant(bool white, List<Square> squares)
+    {
+        foreach (Square square in squares)
+        {
+            if (square.IsOccupied())
+            {
+                if (square.OccupyingPiece().IsWhite() == white)
+                {
+                    if (square.ActiveEnPassant())
+                    {
+                        square.SetEnPassant(null);
+                    }
+                }
+            }
+        }
+    }
+
 }

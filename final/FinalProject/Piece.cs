@@ -106,7 +106,12 @@ public class Piece
             if (idown > 0)
             {
                 name = $"{_letters[i]}{idown}";
-                SpotOccupied(name, squares);
+                occupied = SpotOccupied(name, squares);
+
+                if (occupied)
+                {
+                    idown = -1;
+                }
             }
         }
 
@@ -193,7 +198,7 @@ public class Piece
             }
         }
     }
-        public List<Square> TargetKing(List<Square> squares)
+    public List<Square> TargetKing(List<Square> squares)
     {
         List<Square> attacks = new List<Square>();
         string kingsSquare = "";
@@ -212,14 +217,14 @@ public class Piece
                         continue;
                     }
                     attacks = attacks.Concat(piece.GetMoves(squares)).ToList();
-                    
+
                 }
             }
         }
 
         return attacks;
     }
-        public List<Square> ForbidonSquares(string square, List<Square> squares)
+    public List<Square> ForbidonSquares(string square, List<Square> squares)
     {
         List<Square> moves = new List<Square>();
 
@@ -233,7 +238,7 @@ public class Piece
         }
         return moves;
     }
-        protected List<string> KingMoves(char let, double num)
+    protected List<string> KingMoves(char let, double num)
     {
 
         int position = Array.IndexOf(_letters, let);
