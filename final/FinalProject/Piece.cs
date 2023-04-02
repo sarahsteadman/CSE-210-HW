@@ -18,22 +18,22 @@ public class Piece
     {
         return _white;
     }
-    
+
     public virtual void SetPlace(Square place)
     {
         _place = place;
     }
-    
+
     public string GetSymbol()
     {
         return _symbol;
     }
-    
+
     public bool hasMoved()
     {
         return _moved;
     }
-    
+
     public virtual List<Square> GetMoves(List<Square> squares)
     {
         _currentBoard = squares;
@@ -88,7 +88,7 @@ public class Piece
             return false;
         }
     }
-    
+
     protected void MoveDiagnally(char letter, double num, List<Square> squares)
     {
 
@@ -165,7 +165,7 @@ public class Piece
             }
         }
     }
-    
+
     protected void MoveLinearly(char letter, double num, List<Square> squares)
     {
         int position = Array.IndexOf(_letters, letter);
@@ -215,7 +215,7 @@ public class Piece
             }
         }
     }
-    
+
     public List<Square> TargetKing(List<Square> squares)
     {
         List<Square> attacks = new List<Square>();
@@ -235,7 +235,7 @@ public class Piece
 
         return attacks;
     }
-    
+
     public void setCheck(bool inCheck)
     {
         _inCheck = inCheck;
