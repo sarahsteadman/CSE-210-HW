@@ -1,26 +1,25 @@
 using System;
 
-//  Castling, En Passant
-//  Don't let pieces make moves that could put the king in check. 
-//Hypothetically Checks and game ending has been programmed. Requires testing.
-//
-
-// 
+// test if program tries to get pawns to upgrade during checkcheckmate
 class Program
 {
     static void Main(string[] args)
     {
+        Console.BackgroundColor = ConsoleColor.DarkCyan;
+        Console.ForegroundColor = ConsoleColor.White;
         List<Square> squares = MakeChessBoard();
+        Stack<List<Square>> boardRecord = new Stack<List<Square>>();
 
         bool over = false;
         bool whiteTurn = true;
-        string symbol = "";
 
+        boardRecord.Push(CopyBoard(squares));
+        Instructions();
 
         while (!over)
         {
 
-                        // ****************************Round Set Up******************************** //
+            // ****************************Round Set Up******************************** //
 
             bool inCheck = false;
 
@@ -31,23 +30,22 @@ class Program
             if (whiteTurn)
             {
                 Console.WriteLine("White choose a piece to move");
-                symbol = "K";
             }
             else
             {
                 Console.WriteLine("Black choose a piece to move");
-                symbol = "k";
             }
 
-            inCheck = checkCheck(symbol, squares);
+            inCheck = CheckCheck(whiteTurn, squares);
+
+            over = CheckCheckmate(whiteTurn, squares);
 
             if (inCheck)
             {
-                over = checkCheckmate(symbol, squares);
-
                 if (over)
                 {
                     Console.WriteLine("CHECKMATE!!!");
+                    Console.ReadLine();
                     over = true;
                 }
                 else
@@ -56,13 +54,14 @@ class Program
                 }
             }
 
+
             if (over)
             {
                 break;
             }
 
 
-                        // ***********************Selecting a move*************************** //
+            // ***********************Selecting a move*************************** //
 
 
 
@@ -109,7 +108,7 @@ class Program
                 }
 
                 Console.WriteLine();
-                Console.WriteLine("Enter the move you want or 'b' to select a different piece.");
+                Console.WriteLine("Enter the move you want or 'B' to select a different piece.");
 
                 string selectedMove = Console.ReadLine().ToUpper();
 
@@ -125,19 +124,22 @@ class Program
                     selected.Leave();
                     moves[index].Occupy(piece, moves[index]);
 
-                    if (inCheck)
-                    {
-                        inCheck = checkCheck(symbol, squares);
+                    bool secondCheck = CheckCheck(whiteTurn, squares);
 
+                    if (secondCheck)
+                    {
+                        string message = "This move puts your king in check. Select another move";
                         if (inCheck)
                         {
-                            moves[index].Leave();
-                            selected.Occupy(piece, selected);
-                            Console.WriteLine("This move does not protect your king from being in check. Select another one.");
-                            Thread.Sleep(2000);
-                            Console.Clear();
-                            continue;
+                            message = "This move does not protect your king from being in check. Select another one.";
                         }
+
+                        squares = boardRecord.Peek().ToList();
+                        Console.WriteLine(message);
+                        Thread.Sleep(2000);
+                        Console.Clear();
+                        continue;
+
                     }
                 }
                 else
@@ -153,13 +155,26 @@ class Program
             {
                 Console.WriteLine("There are no moves for this piece. Select another one");
                 Thread.Sleep(2000);
-
                 Console.Clear();
-
                 continue;
             }
 
-                          // **********************Switching Players************************ //
+            UpgradePawn(squares);
+            DisplayChessBoard(whiteTurn, squares);
+
+            Console.WriteLine("Is this the move you wanted?");
+            Console.WriteLine("(Entern N to undo)");
+            string answer = Console.ReadLine().ToUpper();
+
+            if (answer == "N")
+            {
+                squares = boardRecord.Peek().ToList();
+                continue;
+            }
+
+            boardRecord.Push(CopyBoard(squares));
+
+            // **********************Switching Players************************ //
 
 
             if (whiteTurn)
@@ -174,6 +189,33 @@ class Program
         }
     }
 
+    static void Instructions()
+    {
+        Console.WriteLine("Welcome to the Chess Program!");
+        Console.WriteLine("Would you like some instructions on how to use this program?");
+        Console.WriteLine("(Entern Y to bring up instructions)");
+
+        string answer = Console.ReadLine();
+        answer = answer.ToUpper();
+
+        if (answer == "Y")
+        {
+            Console.WriteLine(" To move pieces on the Chess board, select a square by typing in the row then column name ie(A1)");
+            Console.WriteLine();
+            Console.WriteLine(" A set of moves that the piece can perform will will appear.  Enter one of the options.");
+            Console.WriteLine();
+            Console.WriteLine(" Please note that if that move puts your king in check, you will be asked to select another one.");
+            Console.WriteLine();
+            Console.WriteLine(" If you'd like to select another piece to move, type b.");
+            Console.WriteLine();
+            Console.WriteLine(" If you would like to castle, select the rook and then the spot it would move to when it castles. If you are able to castle you will be given that option.");
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine(" To learn what moves each Piece can perform, or to learn the rules of Chess, go to https://chesscoachonline.com/chess-rules");
+            Console.ReadLine();
+        }
+    }
+
     static List<Square> MakeChessBoard()
 
     {
@@ -184,25 +226,14 @@ class Program
         foreach (Square spot in squares)
         {
 
-            if (spot.GetY() == 2 | spot.GetY() == 7)
+            if (spot.GetY() == 2 || spot.GetY() == 7)
             {
 
                 spot.Occupy(pawns.First(), spot);
                 pawns.RemoveAt(0);
 
             }
-            else if (spot.GetY() == 8)
-            {
-                spot.Occupy(pieces.First(), spot);
-                pieces.RemoveAt(0);
-            }
-        }
-
-        pieces.Reverse();
-
-        foreach (Square spot in squares)
-        {
-            if (spot.GetY() == 1)
+            else if (spot.GetY() == 8 || spot.GetY() == 1)
             {
                 spot.Occupy(pieces.First(), spot);
                 pieces.RemoveAt(0);
@@ -211,10 +242,12 @@ class Program
 
         return squares;
     }
+
     static void DisplayChessBoard(bool white, List<Square> squares)
     {
+
         List<Square> fakeSquares = squares;
-        string letters = "   A   B   C   D   E   F   G   H";
+        string letters = "   A   B   C   D   E   F   G   H  ";
         int grid = 1;
         int counter = 8;
         int rowStart = 8;
@@ -222,7 +255,7 @@ class Program
         if (!white)
         {
             fakeSquares = Enumerable.Reverse(squares).ToList();
-            letters = "   H   G   F   E   D   C   B   A";
+            letters = "   H   G   F   E   D   C   B   A  ";
             grid = 8;
             rowStart = 1;
         }
@@ -255,10 +288,11 @@ class Program
         Console.WriteLine(letters);
 
         Console.WriteLine();
+
         // + — + — + — + — + — + — + — + — +
         //1|   |   |   |   |   |   |   |   |
         // + — + — + — + — + — + — + — + — +
-        //2|   |   |   |   |   |   |   |   |
+        //2|   | * |   |   |   |   |   |   |
         // + — + — + — + — + — + — + — + — +
         //3|   |   |   |   |   |   |   |   |
         // + — + — + — + — + — + — + — + — +
@@ -274,6 +308,7 @@ class Program
         // + — + — + — + — + — + — + — + — +
         //   A   B   C   D   E   F   G   H
     }
+
     static List<Piece> MakePawns()
     {
         List<Piece> pawns = new List<Piece>();
@@ -314,14 +349,14 @@ class Program
 
     static List<Piece> MakePieces()
     {
-        var white = true;
+        var white = false;
         var pieces = new List<Piece>();
 
         for (int i = 1; i < 3; i++)
         {
             if (i > 1)
             {
-                white = false;
+                white = true;
             }
 
             Rook rook1 = new Rook(white);
@@ -346,18 +381,129 @@ class Program
         return pieces;
     }
 
-
-    static bool checkCheck(string symbol, List<Square> squares)
+    static bool CheckCheck(bool white, List<Square> squares)
     {
-        Square kingsSquare = squares.Find(s => FindBySymbol(s, symbol));
+        string symbol = "K";
+        Square kingsSquare = squares.Find(s => FindBySymbol(s, symbol, white));
         Piece king = kingsSquare.OccupyingPiece();
         List<Square> attacks = king.TargetKing(squares);
+
         bool canTarget = attacks.Any(s => s.GetName() == kingsSquare.GetName());
+
+        List<Square> rooksquares = squares.FindAll(s => (FindBySymbol(s, "R", white)));
+
+        foreach (Square square in rooksquares)
+        {
+            square.OccupyingPiece().setCheck(canTarget);
+        }
 
         return canTarget;
     }
 
-    static bool checkCheckmate(string symbol, List<Square> squares)
+    static bool CheckCheckmate(bool white, List<Square> squares)
+    {
+        string symbol = "K";
+
+        List<Square> fakeSquares = CopyBoard(squares);
+
+        Square kingsSquare = fakeSquares.Find(s => FindBySymbol(s, symbol, white));
+        Piece king = kingsSquare.OccupyingPiece();
+        List<Square> moves = new List<Square>();
+        bool viableMoves = false;
+
+        foreach (Square square in fakeSquares)
+        {
+            if (square.IsOccupied())
+            {
+                Piece piece = square.OccupyingPiece();
+                if (piece.IsWhite() == king.IsWhite())
+                {
+                    //Checks to see if a 'StaleMate' has occured
+                    moves = piece.GetMoves(fakeSquares);
+                    if (moves.Count < 1)
+                    {
+                        continue;
+                    }
+
+                    viableMoves = true;
+
+                    if (piece.GetSymbol() == "P")
+                    {
+                        piece = new Queen(king.IsWhite());
+                    }
+                    foreach (Square move in moves)
+                    {
+                        square.Leave();
+                        move.Occupy(piece, move);
+                        if (!CheckCheck(white, fakeSquares))
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            move.Leave();
+                            square.Occupy(piece, move);
+                        }
+
+                    }
+
+                }
+            }
+        }
+
+        if (!viableMoves)
+        {
+            Console.WriteLine("There are no more viable moves!");
+        }
+
+        return true;
+    }
+
+    public static bool FindBySymbol(Square square, string symbol, bool white)
+    {
+        if (square.IsOccupied())
+        {
+            if (square.OccupyingPiece().GetSymbol() == symbol)
+            {
+                if (square.OccupyingPiece().IsWhite() == white)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    static void EndEnPassant(bool white, List<Square> squares)
+    {
+        foreach (Square square in squares)
+        {
+            if (square.IsEnPassant())
+            {
+                Square s = square.GetEPPawn();
+                Piece p = s.OccupyingPiece();
+                bool w = p.IsWhite();
+
+                if (square.GetEPPawn().OccupyingPiece().IsWhite() == white)
+                {
+                    square.SetEnPassant(null);
+                }
+            }
+        }
+    }
+
+    static List<Square> CopyBoard(List<Square> squares)
     {
         List<Square> fakeSquares = MakeSquares();
 
@@ -374,77 +520,38 @@ class Program
             }
         }
 
-        Square kingsSquare = fakeSquares.Find(s => FindBySymbol(s, symbol));
-        Piece king = kingsSquare.OccupyingPiece();
-        List<Square> moves = new List<Square>();
-
-        foreach (Square square in fakeSquares)
-        {
-            if (square.IsOccupied())
-            {
-                Piece piece = square.OccupyingPiece();
-                if (piece.IsWhite() == king.IsWhite())
-                {
-                    moves = piece.GetMoves(fakeSquares);
-
-                    if (piece.GetSymbol() == "p" && piece.GetSymbol() == "P")
-                    { piece = new Queen(king.IsWhite()); }
-                    foreach (Square move in moves)
-                    {
-                        square.Leave();
-                        move.Occupy(piece, move);
-                        if (!checkCheck(symbol, fakeSquares))
-                        {
-                            return false;
-                        }
-                        else
-                        {
-                            move.Leave();
-                            square.Occupy(piece, move);
-                        }
-
-                    }
-
-                }
-            }
-        }
-        return true;
+        return fakeSquares;
     }
 
-
-    static bool FindBySymbol(Square square, string symbol)
-    {
-        if (square.IsOccupied())
-        {
-            if (square.OccupyingPiece().GetSymbol() == symbol)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        else
-        {
-            return false;
-        }
-    }
-    static void EndEnPassant(bool white, List<Square> squares)
+    public static void UpgradePawn(List<Square> squares)
     {
         foreach (Square square in squares)
         {
-            if (square.IsOccupied())
+            if (square.GetY() == 1 || square.GetY() == 8)
             {
-                if (square.OccupyingPiece().IsWhite() == white)
+                if (square.IsOccupied())
                 {
-                    if (square.ActiveEnPassant())
+                    bool white = square.OccupyingPiece().IsWhite();
+                    if (square.OccupyingPiece().GetSymbol() == "P")
                     {
-                        square.SetEnPassant(null);
+
+                        Console.WriteLine("Type 'N' or 'Q' to upgrade this pawn to a Knight or Queen.");
+                        string choice = Console.ReadLine().ToUpper();
+
+                        if (choice == "N")
+                        {
+                            Knight knight = new Knight(white);
+                            square.Occupy(knight, square);
+                        }
+                        else if (choice == "Q")
+                        {
+                            Queen queen = new Queen(white);
+                            square.Occupy(queen, square);
+                        }
                     }
                 }
             }
         }
-    }
 
+    }
 }

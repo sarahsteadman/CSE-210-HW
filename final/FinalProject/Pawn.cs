@@ -1,19 +1,12 @@
 public class Pawn : Piece
 {
-    private bool _moved = false;
 
     public Pawn(bool white)
     {
         _white = white;
+        _moved = false;
+        _symbol = "P";
 
-        if (_white)
-        {
-            _symbol = "P";
-        }
-        else
-        {
-            _symbol = "p";
-        }
     }
     public override Piece MakeCopy()
     {
@@ -25,40 +18,43 @@ public class Pawn : Piece
     }
     public override void SetPlace(Square place)
     {
+        if (_place != null)
+        {
+            checkEnPassant(place);
+        }
+
         _place = place;
+
         if (_place.GetName()[1] != '2' && _place.GetName()[1] != '7')
         {
             _moved = true;
-        }
-        if (_place.GetName()[1] == '1' || _place.GetName()[1] == '8')
-        {
-            Upgrade();
         }
 
     }
     public override void CalculateMoves(char let, double num, List<Square> squares)
     {
+        int position = Array.IndexOf(_letters, let);
 
         if (!_moved)
         {
             MoveForward(2, num, let, squares);
+
         }
 
         num = MoveForward(1, num, let, squares);
 
-        int position = Array.IndexOf(_letters, let);
 
         if (position + 1 < 8)
         {
-            string left = $"{_letters[position + 1]}{num}";
+            string right = $"{_letters[position + 1]}{num}";
 
-            SpotOccupied(left, squares);
+            SpotOccupied(right, squares);
         }
         if (position - 1 > -1)
         {
-            string right = $"{_letters[position - 1]}{num}";
+            string left = $"{_letters[position - 1]}{num}";
 
-            SpotOccupied(right, squares);
+            SpotOccupied(left, squares);
         }
     }
 
@@ -87,24 +83,54 @@ public class Pawn : Piece
             {
                 _moves.Add(move);
             }
+
         }
 
         return num;
     }
-    private void Upgrade()
+    private void checkEnPassant(Square place)
     {
-        Console.WriteLine("Type 'N' or 'Q' to upgrade this pawn to a Knight or Queen.");
-        string choice = Console.ReadLine().ToUpper();
+        int num = place.GetY();
+        char let = place.GetName()[0];
 
-        if (choice == "N")
+        int difference = num - _place.GetY();
+
+        if (difference == 2 || difference == -2)
         {
-            Knight knight = new Knight(_white);
-            _place.Occupy(knight, _place);
-        }
-        else if (choice == "Q")
-        {
-            Queen queen = new Queen(_white);
-            _place.Occupy(queen, _place);
+            int position = Array.IndexOf(_letters, let);
+            Square ep = null;
+
+            if (difference == -2)
+            {
+                ep = _currentBoard.Find(s => s.GetName() == ($"{let}{num + 1}"));
+            }
+            else if (difference == +2)
+            {
+                ep = _currentBoard.Find(s => s.GetName() == ($"{let}{num - 1}"));
+            }
+
+            if (position + 1 < 8)
+            {
+                string right = $"{_letters[position + 1]}{num}";
+                Square spot = _currentBoard.First(square => square.GetName() == right);
+
+                if (spot.IsOccupied())
+                {
+                    Square current = _currentBoard.First(square => square.GetName() == $"{let}{num}");
+                    ep.SetEnPassant(current);
+                }
+            }
+            if (position - 1 > -1)
+            {
+                string left = $"{_letters[position - 1]}{num}";
+                Square spot = _currentBoard.First(square => square.GetName() == left);
+
+                if (spot.IsOccupied())
+                {
+                    Square current = _currentBoard.First(square => square.GetName() == $"{let}{num}");
+                    ep.SetEnPassant(current);
+                }
+            }
         }
     }
 }

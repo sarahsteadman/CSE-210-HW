@@ -193,7 +193,7 @@
             "program": "${workspaceFolder}/final/FinalProject/bin/Debug/net7.0/FinalProject.dll",
             "args": [],
             "cwd": "${workspaceFolder}/final/FinalProject",
-            "console": "integratedTerminal",
+            "console": "externalTerminal",
             "internalConsoleOptions": "neverOpen",
             "stopAtEntry": false
         },

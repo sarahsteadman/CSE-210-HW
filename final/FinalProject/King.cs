@@ -1,20 +1,10 @@
 public class King : Piece
 {
-    private bool _moved = false;
-    private bool _inCheck = false;
-
     public King(bool white)
     {
         _white = white;
-
-        if (_white)
-        {
-            _symbol = "K";
-        }
-        else
-        {
-            _symbol = "k";
-        }
+        _symbol = "K";
+        _moved = false;
     }
 
     public override Piece MakeCopy()
@@ -25,19 +15,48 @@ public class King : Piece
 
         return copy;
     }
+
     public override void CalculateMoves(char let, double num, List<Square> squares)
     {
-        List<string> moves = KingMoves(let, num);
 
-        List<Square> attacks = TargetKing(squares);
+        int position = Array.IndexOf(_letters, let);
+        List<string> moves = new List<string>();
 
-        foreach (string move in moves)
+        if (position - 1 > -1)
         {
-            bool canTarget = attacks.Any(item => item.GetName() == move);
-            if (!canTarget)
+            SpotOccupied($"{_letters[position - 1]}{num}", squares);
+
+            if (num - 1 > 0)
             {
-                SpotOccupied(move, squares);
+                SpotOccupied($"{_letters[position - 1]}{num - 1}", squares);
+            }
+            if (num + 1 < 9)
+            {
+                SpotOccupied($"{_letters[position - 1]}{num + 1}", squares);
             }
         }
+        if (position + 1 < 8)
+        {
+            SpotOccupied($"{_letters[position + 1]}{num}", squares);
+
+            if (num - 1 > 0)
+            {
+                SpotOccupied($"{_letters[position + 1]}{num - 1}", squares);
+            }
+            if (num + 1 < 9)
+            {
+                SpotOccupied($"{_letters[position + 1]}{num + 1}", squares);
+            }
+        }
+
+        if (num - 1 > 0)
+        {
+            SpotOccupied($"{_letters[position]}{num - 1}", squares);
+        }
+        if (num + 1 < 9)
+        {
+            SpotOccupied($"{_letters[position]}{num + 1}", squares);
+        }
     }
+
 }

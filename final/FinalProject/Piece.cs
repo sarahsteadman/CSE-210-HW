@@ -5,26 +5,38 @@ public class Piece
     protected Square _place;
     protected List<Square> _moves = new List<Square>();
     protected char[] _letters = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' };
+    protected List<Square> _currentBoard;
+    protected bool _moved = false;
+    protected bool _inCheck;
 
     public virtual Piece MakeCopy()
     {
         return new Piece();
     }
+
     public bool IsWhite()
     {
         return _white;
     }
+    
     public virtual void SetPlace(Square place)
     {
         _place = place;
     }
+    
     public string GetSymbol()
     {
         return _symbol;
     }
-
+    
+    public bool hasMoved()
+    {
+        return _moved;
+    }
+    
     public virtual List<Square> GetMoves(List<Square> squares)
     {
+        _currentBoard = squares;
         _moves.Clear();
 
         string currentSpot = _place.GetName();
@@ -62,8 +74,12 @@ public class Piece
             }
         }
 
-        if (_symbol == "P" || _symbol == "p")
+        if (_symbol == "P")
         {
+            if (spot.IsEnPassant())
+            {
+                _moves.Add(spot);
+            }
             return false;
         }
         else
@@ -72,6 +88,7 @@ public class Piece
             return false;
         }
     }
+    
     protected void MoveDiagnally(char letter, double num, List<Square> squares)
     {
 
@@ -148,7 +165,7 @@ public class Piece
             }
         }
     }
-
+    
     protected void MoveLinearly(char letter, double num, List<Square> squares)
     {
         int position = Array.IndexOf(_letters, letter);
@@ -198,10 +215,10 @@ public class Piece
             }
         }
     }
+    
     public List<Square> TargetKing(List<Square> squares)
     {
         List<Square> attacks = new List<Square>();
-        string kingsSquare = "";
         foreach (Square square in squares)
         {
             if (square.IsOccupied())
@@ -209,13 +226,7 @@ public class Piece
                 Piece piece = square.OccupyingPiece();
                 if (piece.IsWhite() != _white)
                 {
-                    if (piece.GetSymbol() == "K" || piece.GetSymbol() == "k")
-                    {
-                        kingsSquare = square.GetName();
 
-                        attacks = attacks.Concat(ForbidonSquares(kingsSquare, squares)).ToList();
-                        continue;
-                    }
                     attacks = attacks.Concat(piece.GetMoves(squares)).ToList();
 
                 }
@@ -224,64 +235,9 @@ public class Piece
 
         return attacks;
     }
-    public List<Square> ForbidonSquares(string square, List<Square> squares)
+    
+    public void setCheck(bool inCheck)
     {
-        List<Square> moves = new List<Square>();
-
-        char[] parts = square.ToCharArray();
-        double num = Char.GetNumericValue(parts[1]);
-        char let = parts[0];
-
-        foreach (string name in KingMoves(let, num))
-        {
-            moves.Add(squares.First(square => square.GetName() == name));
-        }
-        return moves;
+        _inCheck = inCheck;
     }
-    protected List<string> KingMoves(char let, double num)
-    {
-
-        int position = Array.IndexOf(_letters, let);
-        List<string> moves = new List<string>();
-
-        if (position - 1 > -1)
-        {
-            moves.Add($"{_letters[position - 1]}{num}");
-
-            if (num - 1 > 0)
-            {
-                moves.Add($"{_letters[position - 1]}{num - 1}");
-            }
-            if (num + 1 < 9)
-            {
-                moves.Add($"{_letters[position - 1]}{num + 1}");
-            }
-        }
-        if (position + 1 < 8)
-        {
-            moves.Add($"{_letters[position + 1]}{num}");
-
-            if (num - 1 > 0)
-            {
-                moves.Add($"{_letters[position + 1]}{num - 1}");
-            }
-            if (num + 1 < 9)
-            {
-                moves.Add($"{_letters[position + 1]}{num + 1}");
-            }
-        }
-
-        if (num - 1 > 0)
-        {
-            moves.Add($"{_letters[position]}{num - 1}");
-        }
-        if (num + 1 < 9)
-        {
-            moves.Add($"{_letters[position]}{num + 1}");
-        }
-
-        return moves;
-    }
-
-
 }

@@ -5,7 +5,7 @@ public class Square
     private int _y;
     private bool _isOccupied;
     private Piece _occupyingPiece;
-    private Square _enPassant = null;
+    private Square _epPawn = null;
 
     public Square(int x, int y)
     {
@@ -14,49 +14,68 @@ public class Square
 
         SpotNamer();
     }
+
     private void SpotNamer()
     {
-        string[] letters = {"A","B","C","D","E", "F", "G", "H"};
+        string[] letters = { "A", "B", "C", "D", "E", "F", "G", "H" };
 
         int i = _x - 1;
         _name = $"{letters[i]}{_y}";
     }
+
     public string GetName()
     {
         return _name;
     }
+
     public int GetY()
     {
         return _y;
     }
+
     public void Occupy(Piece p, Square s)
     {
+        p.SetPlace(s);
         _isOccupied = true;
         _occupyingPiece = p;
-        p.SetPlace(s);
 
-        if (_enPassant != null)
+        if (_epPawn != null)
         {
-            if( p.GetSymbol() == "p" || p.GetSymbol() ==  "P");
+            if (p.GetSymbol() == "P") ;
             {
                 EnPassant();
             }
         }
     }
+
     public void Leave()
     {
         _isOccupied = false;
         _occupyingPiece = null;
     }
+
     public void DisplaySquare(int magicNumber)
     {
         if (_x == magicNumber)
         {
             if (_isOccupied)
             {
-            Console.Write($"| {_occupyingPiece.GetSymbol()} |");
+                if (!_occupyingPiece.IsWhite())
+                {
+                    Console.Write("| ");
+                    Console.ForegroundColor = ConsoleColor.Black;
+                    Console.Write(_occupyingPiece.GetSymbol());
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.Write(" |");
+
+                }
+                else
+                {
+                    Console.Write($"| {_occupyingPiece.GetSymbol()} |");
+                }
             }
-            else{
+            else
+            {
                 Console.Write("|   |");
             }
         }
@@ -64,29 +83,51 @@ public class Square
         {
             if (_isOccupied)
             {
-            Console.Write($"| {_occupyingPiece.GetSymbol()} ");
+                if (!_occupyingPiece.IsWhite())
+                {
+                    Console.Write("| ");
+                    Console.ForegroundColor = ConsoleColor.Black;
+                    Console.Write(_occupyingPiece.GetSymbol());
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.Write(" ");
+                }
+                else
+                {
+                    Console.Write($"| {_occupyingPiece.GetSymbol()} ");
+                }
             }
-            else{
+            else
+            {
                 Console.Write("|   ");
             }
 
         }
     }
+
     public bool IsOccupied()
     {
         return _isOccupied;
     }
+
     public Piece OccupyingPiece()
     {
         return _occupyingPiece;
     }
+
     public void SetEnPassant(Square PawnsSquare)
     {
-        PawnsSquare = _enPassant;
+        _epPawn = PawnsSquare;
     }
-    public bool ActiveEnPassant()
+
+    public Square GetEPPawn()
     {
-        if(_enPassant != null)
+        return _epPawn;
+    }
+
+    public bool IsEnPassant()
+    {
+
+        if (_epPawn != null)
         {
             return true;
         }
@@ -95,9 +136,10 @@ public class Square
             return false;
         }
     }
+
     public void EnPassant()
     {
-            _enPassant.Leave();
-            _enPassant = null;
+        _epPawn.Leave();
+        _epPawn = null;
     }
 }

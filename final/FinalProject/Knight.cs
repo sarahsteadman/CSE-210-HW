@@ -1,20 +1,14 @@
 public class Knight : Piece
 {
-private bool _inCheck = false;
+    public Knight(bool white)
+    {
+        _white = white;
 
-public Knight(bool white)
-{
-    _white = white;
 
-        if (_white)
-        {
-            _symbol = "N";
-        }
-        else
-        {
-            _symbol = "n";
-        }
-}
+        _symbol = "N";
+
+
+    }
     public override Piece MakeCopy()
     {
         Knight copy = new Knight(_white);
