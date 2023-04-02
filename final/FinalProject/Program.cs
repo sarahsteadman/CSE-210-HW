@@ -73,7 +73,7 @@ class Program
 
                 if (selected.IsOccupied() == false)
                 {
-                    Console.WriteLine("This Square is empty. Please select another");
+                    Console.WriteLine("This Square is empty.");
                     Thread.Sleep(2000);
                     Console.Clear();
                     continue;
@@ -81,7 +81,7 @@ class Program
             }
             catch (NullReferenceException)
             {
-                Console.WriteLine("That is not a valid square name. Select another one.");
+                Console.WriteLine("That is not a valid square name.");
                 Thread.Sleep(2000);
                 Console.Clear();
                 continue;
@@ -91,7 +91,7 @@ class Program
 
             if (piece.IsWhite() != whiteTurn)
             {
-                Console.WriteLine("This piece is your opponents. Choose one of your own pieces");
+                Console.WriteLine("This piece is your opponents.");
                 Thread.Sleep(2000);
                 Console.Clear();
                 continue;
@@ -128,10 +128,10 @@ class Program
 
                     if (secondCheck)
                     {
-                        string message = "This move puts your king in check. Select another move";
+                        string message = "This move puts your king in check.";
                         if (inCheck)
                         {
-                            message = "This move does not protect your king from being in check. Select another one.";
+                            message = "This move does not protect your king from being in check.";
                         }
 
                         squares = boardRecord.Peek().ToList();
@@ -153,7 +153,7 @@ class Program
             }
             else
             {
-                Console.WriteLine("There are no moves for this piece. Select another one");
+                Console.WriteLine("There are no moves for this piece.");
                 Thread.Sleep(2000);
                 Console.Clear();
                 continue;
